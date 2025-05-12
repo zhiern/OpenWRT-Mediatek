@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# 自定义URL
+export mirror=https://script.kejizero.online
+
+# 替换插件
+rm -rf feeds/luci/themes/luci-theme-argon
+rm -rf feeds/luci/applications/luci-app-argon-config
+
 # 翻译
 echo -e "\nmsgid \"Control\"" >> feeds/luci/modules/luci-base/po/zh_Hans/base.po
 echo -e "msgstr \"控制\"" >> feeds/luci/modules/luci-base/po/zh_Hans/base.po
@@ -36,9 +43,36 @@ sed -i "s/MT7981_AX3000_5G/ZeroWrt-5G/g" package/mtk/drivers/wifi-profile/files/
 sed -i "s/ImmortalWrt-2.4G/ZeroWrt-2.4G/g" package/mtk/applications/mtwifi-cfg/files/mtwifi.sh
 sed -i "s/ImmortalWrt-5G/ZeroWrt-5G/g" package/mtk/applications/mtwifi-cfg/files/mtwifi.sh
 
+# TTYD
+sed -i 's/services/system/g' feeds/luci/applications/luci-app-ttyd/root/usr/share/luci/menu.d/luci-app-ttyd.json
+sed -i '3 a\\t\t"order": 50,' feeds/luci/applications/luci-app-ttyd/root/usr/share/luci/menu.d/luci-app-ttyd.json
+sed -i 's/procd_set_param stdout 1/procd_set_param stdout 0/g' feeds/packages/utils/ttyd/files/ttyd.init
+sed -i 's/procd_set_param stderr 1/procd_set_param stderr 0/g' feeds/packages/utils/ttyd/files/ttyd.init
+
+# luci-mod extra
+pushd feeds/luci
+    curl -s $mirror/openwrt/patch/luci/0001-luci-mod-system-add-modal-overlay-dialog-to-reboot.patch | patch -p1
+    curl -s $mirror/openwrt/patch/luci/0002-luci-mod-status-displays-actual-process-memory-usage.patch | patch -p1
+    curl -s $mirror/openwrt/patch/luci/0003-luci-mod-status-storage-index-applicable-only-to-val.patch | patch -p1
+    curl -s $mirror/openwrt/patch/luci/0004-luci-mod-status-firewall-disable-legacy-firewall-rul.patch | patch -p1
+    curl -s $mirror/openwrt/patch/luci/0005-luci-mod-system-add-refresh-interval-setting.patch | patch -p1
+    curl -s $mirror/openwrt/patch/luci/0007-luci-mod-system-add-ucitrack-luci-mod-system-zram.js.patch | patch -p1
+popd
+
 ## golang 为 1.24.x
 rm -rf feeds/packages/lang/golang
 git clone https://github.com/sbwml/packages_lang_golang -b 24.x feeds/packages/lang/golang
+
+# argon
+git clone https://github.com/jerrykuku/luci-theme-argon.git package/new/luci-theme-argon
+curl -s $mirror/Customize/argon/bg1.jpg > package/new/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
+
+# argon-config
+git clone https://github.com/jerrykuku/luci-app-argon-config.git package/new/luci-app-argon-config
+sed -i "s/bing/none/g" package/new/luci-app-argon-config/root/etc/config/argon
+
+# adguardhome
+git clone -b lua https://github.com/sirpdboy/luci-app-adguardhome package/new/luci-app-adguardhome
 
 # Toolchain Cache
 if [ "$BUILD_FAST" = "y" ]; then
@@ -50,3 +84,21 @@ if [ "$BUILD_FAST" = "y" ]; then
     find ./staging_dir/ -name '*' -exec touch {} \; >/dev/null 2>&1
     find ./tmp/ -name '*' -exec touch {} \; >/dev/null 2>&1
 fi
+
+# 版本设置
+cat << 'EOF' >> feeds/luci/modules/luci-mod-status/ucode/template/admin_status/index.ut
+<script>
+function addLinks() {
+    var section = document.querySelector(".cbi-section");
+    if (section) {
+        var links = document.createElement('div');
+        links.innerHTML = '<div class="table"><div class="tr"><div class="td left" width="33%"><a href="https://qm.qq.com/q/JbBVnkjzKa" target="_blank">QQ交流群</a></div><div class="td left" width="33%"><a href="https://t.me/kejizero" target="_blank">TG交流群</a></div><div class="td left"><a href="https://openwrt.kejizero.online" target="_blank">固件地址</a></div></div></div>';
+        section.appendChild(links);
+    } else {
+        setTimeout(addLinks, 100); // 继续等待 `.cbi-section` 加载
+    }
+}
+
+document.addEventListener("DOMContentLoaded", addLinks);
+</script>
+EOF
