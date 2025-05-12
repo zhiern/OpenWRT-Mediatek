@@ -3,6 +3,15 @@
 # 自定义URL
 export mirror=https://script.kejizero.online
 
+# 私有Gitea
+export gitea=https://git.kejizero.online
+
+# GitHub镜像
+export github="github.com"
+
+# 下载进度条
+CURL_BAR="--progress-bar"
+
 # 替换插件
 rm -rf feeds/luci/themes/luci-theme-argon
 rm -rf feeds/luci/applications/luci-app-argon-config
@@ -61,18 +70,37 @@ popd
 
 ## golang 为 1.24.x
 rm -rf feeds/packages/lang/golang
-git clone https://github.com/sbwml/packages_lang_golang -b 24.x feeds/packages/lang/golang
+git clone --depth=1 https://github.com/sbwml/packages_lang_golang -b 24.x feeds/packages/lang/golang
 
 # argon
-git clone https://github.com/jerrykuku/luci-theme-argon.git package/new/luci-theme-argon
+git clone --depth=1 https://github.com/jerrykuku/luci-theme-argon.git package/new/luci-theme-argon
 curl -s $mirror/Customize/argon/bg1.jpg > package/new/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
 
 # argon-config
-git clone https://github.com/jerrykuku/luci-app-argon-config.git package/new/luci-app-argon-config
+git clone --depth=1 https://github.com/jerrykuku/luci-app-argon-config.git package/new/luci-app-argon-config
 sed -i "s/bing/none/g" package/new/luci-app-argon-config/root/etc/config/argon
 
 # adguardhome
-git clone -b lua https://github.com/sirpdboy/luci-app-adguardhome package/new/luci-app-adguardhome
+git clone --depth=1 -b lua https://github.com/sirpdboy/luci-app-adguardhome package/new/luci-app-adguardhome
+
+# nikki
+git clone --depth=1 https://github.com/nikkinikki-org/OpenWrt-nikki package/new/OpenWrt-nikki
+
+# docker
+rm -rf feeds/luci/applications/luci-app-dockerman
+git clone https://$github/oppen321/luci-app-dockerman -b main feeds/luci/applications/luci-app-dockerman
+    rm -rf feeds/packages/utils/{docker,dockerd,containerd,runc}
+    git clone $gitea/zhao/packages_utils_docker feeds/packages/utils/docker
+    git clone $gitea/zhao/packages_utils_dockerd feeds/packages/utils/dockerd
+    git clone $gitea/zhao/packages_utils_containerd feeds/packages/utils/containerd
+    git clone $gitea/zhao/packages_utils_runc feeds/packages/utils/runc
+    sed -i '/cgroupfs-mount/d' feeds/packages/utils/dockerd/Config.in
+sed -i '/sysctl.d/d' feeds/packages/utils/dockerd/Makefile
+pushd feeds/packages
+    curl -s $mirror/openwrt/patch/docker/0001-dockerd-fix-bridge-network.patch | patch -p1
+    curl -s $mirror/openwrt/patch/docker/0002-docker-add-buildkit-experimental-support.patch | patch -p1
+    curl -s $mirror/openwrt/patch/docker/0003-dockerd-disable-ip6tables-for-bridge-network-by-defa.patch | patch -p1
+popd
 
 # Toolchain Cache
 if [ "$BUILD_FAST" = "y" ]; then
