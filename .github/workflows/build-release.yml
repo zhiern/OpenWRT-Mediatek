@@ -34,8 +34,8 @@ on:
         default: true
 
 env:
-  REPO_URL: https://github.com/padavanonly/immortalwrt-mt798x-24.10
-  REPO_BRANCH: 2410
+  REPO_URL: https://github.com/hanwckf/immortalwrt-mt798x
+  REPO_BRANCH: openwrt-21.02
   CONFIG_FILE: configs/${{ github.event.inputs.device }}.config
   DIY_SCRIPT: diy-mediatek.sh
   CACHE_TOOLCHAIN: true
