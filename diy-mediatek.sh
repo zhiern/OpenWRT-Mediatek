@@ -3,12 +3,6 @@
 # 自定义URL
 export mirror=https://script.kejizero.online
 
-# 私有Gitea
-export gitea=https://git.kejizero.online
-
-# GitHub镜像
-export github="github.com"
-
 # 下载进度条
 CURL_BAR="--progress-bar"
 
