@@ -58,17 +58,6 @@ sed -i '3 a\\t\t"order": 50,' feeds/luci/applications/luci-app-ttyd/root/usr/sha
 sed -i 's/procd_set_param stdout 1/procd_set_param stdout 0/g' feeds/packages/utils/ttyd/files/ttyd.init
 sed -i 's/procd_set_param stderr 1/procd_set_param stderr 0/g' feeds/packages/utils/ttyd/files/ttyd.init
 
-# luci-mod extra
-pushd feeds/luci
-    curl -s $mirror/openwrt/patch/luci/0001-luci-mod-system-add-modal-overlay-dialog-to-reboot.patch | patch -p1
-    curl -s $mirror/openwrt/patch/luci/0002-luci-mod-status-displays-actual-process-memory-usage.patch | patch -p1
-    curl -s $mirror/openwrt/patch/luci/0003-luci-mod-status-storage-index-applicable-only-to-val.patch | patch -p1
-    curl -s $mirror/openwrt/patch/luci/0004-luci-mod-status-firewall-disable-legacy-firewall-rul.patch | patch -p1
-    curl -s $mirror/openwrt/patch/luci/0005-luci-mod-system-add-refresh-interval-setting.patch | patch -p1
-    curl -s $mirror/openwrt/patch/luci/0006-luci-mod-system-mounts-add-docker-directory-mount-po.patch | patch -p1
-    curl -s $mirror/openwrt/patch/luci/0007-luci-mod-system-add-ucitrack-luci-mod-system-zram.js.patch | patch -p1
-popd
-
 ## golang 为 1.24.x
 rm -rf feeds/packages/lang/golang
 git clone --depth=1 https://github.com/sbwml/packages_lang_golang -b 24.x feeds/packages/lang/golang
@@ -86,22 +75,6 @@ git clone --depth=1 -b lua https://github.com/sirpdboy/luci-app-adguardhome pack
 
 # nikki
 git clone --depth=1 https://github.com/nikkinikki-org/OpenWrt-nikki package/new/OpenWrt-nikki
-
-# docker
-rm -rf feeds/luci/applications/luci-app-dockerman
-git clone https://$github/oppen321/luci-app-dockerman -b main feeds/luci/applications/luci-app-dockerman
-    rm -rf feeds/packages/utils/{docker,dockerd,containerd,runc}
-    git clone $gitea/zhao/packages_utils_docker feeds/packages/utils/docker
-    git clone $gitea/zhao/packages_utils_dockerd feeds/packages/utils/dockerd
-    git clone $gitea/zhao/packages_utils_containerd feeds/packages/utils/containerd
-    git clone $gitea/zhao/packages_utils_runc feeds/packages/utils/runc
-    sed -i '/cgroupfs-mount/d' feeds/packages/utils/dockerd/Config.in
-sed -i '/sysctl.d/d' feeds/packages/utils/dockerd/Makefile
-pushd feeds/packages
-    curl -s $mirror/openwrt/patch/docker/0001-dockerd-fix-bridge-network.patch | patch -p1
-    curl -s $mirror/openwrt/patch/docker/0002-docker-add-buildkit-experimental-support.patch | patch -p1
-    curl -s $mirror/openwrt/patch/docker/0003-dockerd-disable-ip6tables-for-bridge-network-by-defa.patch | patch -p1
-popd
 
 # Toolchain Cache
 if [ "$BUILD_FAST" = "y" ]; then
