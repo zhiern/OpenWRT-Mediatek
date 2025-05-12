@@ -65,3 +65,7 @@ if [ "$BUILD_FAST" = "y" ]; then
     find ./staging_dir/ -name '*' -exec touch {} \; >/dev/null 2>&1
     find ./tmp/ -name '*' -exec touch {} \; >/dev/null 2>&1
 fi
+
+# install feeds
+./scripts/feeds update -a
+./scripts/feeds install -a
