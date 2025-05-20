@@ -28,6 +28,32 @@ on:
         required: true
         default: '10.0.0.1'
         type: string
+      wifi_driver:
+        description: 'Choose WiFi Driver'
+        required: true
+        default: 'v7.6.7.2-fw-20240823(recommend)'
+        type: choice
+        options:
+        - v7.6.7.2-fw-20240823(recommend)
+        - v7.6.6.1-fw-20230808(recommend)
+        - v7.6.7.2-fw-default
+        - v7.6.7.2-fw-20221208
+        - v7.6.7.2-fw-20230421
+        - v7.6.7.2-fw-20230808
+        - v7.6.7.2-fw-20231024
+        - v7.6.6.1-fw-default
+        - v7.6.6.1-fw-20221208
+        - v7.6.6.1-fw-20230421
+        - v7.6.6.1-fw-20231024
+        - v7.6.6.1-fw-20240823
+      sw_driver:
+        description: 'Choose Switch Driver'
+        required: true
+        default: 'GSW'
+        type: choice
+        options:
+        - GSW
+        - DSA
       ccache:
         description: 'Enable ccache (Use Cache to speed up next build)'
         type: boolean
